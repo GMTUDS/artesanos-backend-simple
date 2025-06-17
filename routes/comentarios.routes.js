@@ -1,9 +1,12 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const comentariosController = require('../controllers/comentarios.controller');
-const auth = require('../middlewares/authMiddleware');
+const auth = require("../middlewares/authMiddleware");
+const comentariosController = require("../controllers/comentarios.controller");
 
-router.post('/', auth, comentariosController.agregarComentario);
-router.get('/:imagen_id', auth, comentariosController.obtenerComentariosPorImagen);
+// Crear un comentario
+router.post("/", auth, comentariosController.crearComentario);
+
+// Obtener comentarios de una imagen
+router.get("/:imagen_id", auth, comentariosController.obtenerPorImagen);
 
 module.exports = router;
