@@ -4,7 +4,7 @@
   "description": "Backend para la red social Artesanos.com",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "echo '--- VARIABLES DE ENTORNO EN RAILWAY ---' && printenv && echo '--- INICIANDO APP ---' && node app.js",
     "dev": "npx nodemon app.js"
   },
   "dependencies": {
