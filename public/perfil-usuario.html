@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Mi Perfil - Artesanos</title>
   <style>
     img {
@@ -12,6 +12,13 @@
       border: 1px solid #ccc;
       padding: 10px;
       margin-top: 20px;
+    }
+    .comentarios {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .comentarios p {
+      margin: 3px 0;
     }
   </style>
 </head>
@@ -152,17 +159,65 @@
         const container = document.getElementById("albumesContainer");
         container.innerHTML = "";
 
-        albumes.forEach(album => {
+        for (const album of albumes) {
           const div = document.createElement("div");
           div.className = "album";
           div.innerHTML = `<h3>${album.titulo}</h3><p>${album.descripcion || ""}</p>`;
-          album.Imagens.forEach(img => {
-            const imagenTag = document.createElement("img");
-            imagenTag.src = "/" + img.ruta_archivo.replace(/\\/g, "/");
-            div.appendChild(imagenTag);
-          });
+
+          for (const img of album.Imagens) {
+            const imgTag = document.createElement("img");
+            imgTag.src = "/" + img.ruta_archivo.replace(/\\/g, "/");
+            div.appendChild(imgTag);
+
+            const comentariosDiv = document.createElement("div");
+            comentariosDiv.className = "comentarios";
+            const resC = await fetch(`http://localhost:3000/comentarios/${img.id_imagen}`, {
+              headers: { Authorization: token }
+            });
+            const comentarios = await resC.json();
+
+            if (comentarios.length) {
+              comentariosDiv.innerHTML = "<strong>Comentarios:</strong><br>";
+              comentarios.forEach(c => {
+                comentariosDiv.innerHTML += `<p><a href="perfil-publico.html?id=${c.Usuario.id_usuario}">${c.Usuario.nombre_usuario}</a>: ${c.contenido}</p>`;
+              });
+            }
+
+            const form = document.createElement("form");
+            form.onsubmit = async e => {
+              e.preventDefault();
+              const contenido = form.elements.contenido.value.trim();
+              if (!contenido) return;
+
+              const resp = await fetch("http://localhost:3000/comentarios", {
+                method: "POST",
+                headers: {
+                  Authorization: token,
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ imagen_id: img.id_imagen, contenido })
+              });
+
+              if (resp.ok) {
+                form.reset();
+                cargarAlbumes();
+              } else {
+                const errorData = await resp.json();
+                alert("❌ Error al comentar: " + (errorData.error || ""));
+              }
+            };
+
+            form.innerHTML = `
+              <input name="contenido" placeholder="Escribe un comentario" required>
+              <button type="submit">Enviar</button>
+            `;
+
+            div.appendChild(comentariosDiv);
+            div.appendChild(form);
+          }
+
           container.appendChild(div);
-        });
+        }
       } catch (err) {
         document.getElementById("albumesContainer").textContent = "Error al cargar álbumes";
       }

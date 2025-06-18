@@ -1,19 +1,21 @@
 const { Comentario, Usuario } = require('../models');
 
-// POST /comentarios - crear un comentario
+// Crear nuevo comentario
 exports.crearComentario = async (req, res) => {
   const usuario_id = req.usuario.id;
   const { imagen_id, contenido } = req.body;
 
+  console.log("📝 Intentando comentar", { usuario_id, imagen_id, contenido }); // DEBUG
+
   if (!imagen_id || !contenido) {
-    return res.status(400).json({ error: "Faltan datos obligatorios." });
+    return res.status(400).json({ error: "Faltan datos" });
   }
 
   try {
     const nuevo = await Comentario.create({
       usuario_id,
       imagen_id,
-      contenido
+      texto:contenido
     });
     res.status(201).json({ mensaje: "Comentario creado", comentario: nuevo });
   } catch (error) {
@@ -22,7 +24,7 @@ exports.crearComentario = async (req, res) => {
   }
 };
 
-// GET /comentarios/:imagen_id - obtener comentarios de una imagen
+// Obtener comentarios por imagen
 exports.obtenerPorImagen = async (req, res) => {
   const { imagen_id } = req.params;
 
